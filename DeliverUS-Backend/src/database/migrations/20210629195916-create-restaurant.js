@@ -66,6 +66,14 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: new Date()
       },
+      fijado: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      fechaFijado: {
+        type: Sequelize.DATE,
+        defaultValue: new Date()
+      },
       userId: {
         allowNull: false,
         type: Sequelize.INTEGER,

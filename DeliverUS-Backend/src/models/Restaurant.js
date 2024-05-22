@@ -76,6 +76,14 @@ const loadModel = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE,
       defaultValue: new Date()
+    },
+    fijado: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    fechaFijado: {
+      type: DataTypes.DATE,
+      defaultValue: new Date()
     }
   }, {
     sequelize,

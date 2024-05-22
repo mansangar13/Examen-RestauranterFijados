@@ -1,4 +1,4 @@
-import { Restaurant, Product, RestaurantCategory, ProductCategory } from '../models/models.js'
+import { Restaurant, Product, RestaurantCategory, ProductCategory, sequelizeSession } from '../models/models.js'
 
 const index = async function (req, res) {
   try {
@@ -28,7 +28,9 @@ const indexOwner = async function (req, res) {
         include: [{
           model: RestaurantCategory,
           as: 'restaurantCategory'
-        }]
+        }],
+        // ordenar por fecha de fijado
+        order: [['fijado', 'DESC'], ['fechaFijado', 'DESC']]
       })
     res.json(restaurants)
   } catch (err) {
@@ -95,12 +97,32 @@ const destroy = async function (req, res) {
   }
 }
 
+const fijarRestaurante = async function (req, res) {
+  try {
+    // Buscamos el restaurante sin usar una transacción
+    const restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    console.log(restaurant)
+
+    // Actualizamos el restaurante basado en su estado actual
+    const updatedRestaurant = await Restaurant.update(
+      { fijado: !restaurant.fijado, fechaFijado: new Date() },
+      { where: { id: restaurant.id } }
+    )
+
+    res.json(updatedRestaurant) // Enviamos la respuesta
+  } catch (error) {
+    console.log(error)
+    res.status(500).send(error) // Enviamos un código de error HTTP 500
+  }
+}
+
 const RestaurantController = {
   index,
   indexOwner,
   create,
   show,
   update,
-  destroy
+  destroy,
+  fijarRestaurante
 }
 export default RestaurantController

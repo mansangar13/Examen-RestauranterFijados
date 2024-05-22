@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, FlatList, Pressable, View } from 'react-native'
 
-import { getAll, remove } from '../../api/RestaurantEndpoints'
+import { fijarRestaurante, getAll, remove } from '../../api/RestaurantEndpoints'
 import ImageCard from '../../components/ImageCard'
 import TextSemiBold from '../../components/TextSemibold'
 import TextRegular from '../../components/TextRegular'
@@ -39,7 +39,47 @@ export default function RestaurantsScreen ({ navigation, route }) {
         {item.averageServiceMinutes !== null &&
           <TextSemiBold>Avg. service time: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.averageServiceMinutes} min.</TextSemiBold></TextSemiBold>
         }
-        <TextSemiBold>Shipping: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.shippingCosts.toFixed(2)}€</TextSemiBold></TextSemiBold>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <TextSemiBold>Shipping: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.shippingCosts.toFixed(2)}€</TextSemiBold></TextSemiBold>
+          {item.fijado === false &&
+            <Pressable
+              onPress={() => { fijar(item) }
+              }
+                style={({ pressed }) => [
+                  {
+                    backgroundColor: pressed
+                      ? GlobalStyles.brandGreenTap
+                      : GlobalStyles.brandGreen
+                  },
+                  styles.actionButtonFijar
+                ]}>
+              <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+                <MaterialCommunityIcons name='star' color={'white'} size={20}/>
+                <TextRegular textStyle={styles.text}>
+                  Fijar
+                </TextRegular>
+              </View>
+            </Pressable> }
+          {item.fijado === true &&
+          <Pressable
+          onPress={() => { fijar(item) }
+            }
+              style={({ pressed }) => [
+                {
+                  backgroundColor: pressed
+                    ? GlobalStyles.brandSecondaryTap
+                    : GlobalStyles.brandSecondary
+                },
+                styles.actionButtonFijar
+              ]}>
+            <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+              <MaterialCommunityIcons name='star' color={'white'} size={20}/>
+              <TextRegular textStyle={styles.text}>
+                Desfijar
+              </TextRegular>
+            </View>
+          </Pressable> }
+        </View>
         <View style={styles.actionButtonsContainer}>
           <Pressable
             onPress={() => navigation.navigate('EditRestaurantScreen', { id: item.id })
@@ -153,6 +193,37 @@ export default function RestaurantsScreen ({ navigation, route }) {
     }
   }
 
+  const fijar = async (restaurant) => {
+    try {
+      await fijarRestaurante(restaurant.id)
+      console.log(fijarRestaurante)
+      await fetchRestaurants()
+      if (restaurant.fijado === true) {
+        showMessage({
+          message: `Restaurant ${restaurant.name} succesfully desfijado`,
+          type: 'success',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+      } else {
+        showMessage({
+          message: `Restaurant ${restaurant.name} succesfully fijado`,
+          type: 'success',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+      }
+    } catch (error) {
+      console.log(error)
+      showMessage({
+        message: `Restaurant ${restaurant.name} could not be fijado.`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
   return (
     <>
     <FlatList
@@ -196,6 +267,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'column',
     width: '50%'
+  },
+  actionButtonFijar: {
+    borderRadius: 10
   },
   actionButtonsContainer: {
     flexDirection: 'row',
